@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { followUniversity, findNewsByUrl, saveNewsToDatabase, getSavedNewsByUser, getSavedNewsByUserId, removeNewsFromDatabase   } from '../../../repositories/prisma/prisma-save-repository';
+import { followUniversity, findNewsByUrl, saveNewsToDatabase, getSavedNewsByUser, getSavedNewsByUserId, removeNewsFromDatabase, unfollowUniversity, getFollowedUniversitiesByUser  } from '../../../repositories/prisma/prisma-save-repository';
 
 interface GetSavedNewsQuery {
   userId: string;
@@ -14,6 +14,23 @@ export const followUniversityHandler = async (request: FastifyRequest, reply: Fa
   } catch (error) {
     console.error('Error following university:', error);
     return reply.status(500).send({ error: 'Unable to follow university' });
+  }
+};
+
+export const getFollowedUniversitiesHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+  const { userId } = request.query as { userId: string };
+
+  try {
+    const followedUniversities = await getFollowedUniversitiesByUser(userId);
+
+    if (followedUniversities.length === 0) {
+      return reply.status(404).send({ message: 'Você não segue nenhuma universidade.' });
+    }
+
+    return reply.send(followedUniversities);
+  } catch (error) {
+    console.error('Error fetching followed universities:', error);
+    return reply.status(500).send({ error: 'Erro ao buscar universidades seguidas.' });
   }
 };
 
@@ -94,7 +111,6 @@ export async function getSavedNewsByUserIdHandler(req: FastifyRequest<{ Querystr
 
   try {
     const savedNews = await getSavedNewsByUserId(userId);
-    // Verifique se `savedNews` é um array
     if (!Array.isArray(savedNews)) {
       console.error('Saved news is not an array:', savedNews);
       return reply.status(500).send({ error: 'Internal Server Error' });
@@ -109,19 +125,33 @@ export async function getSavedNewsByUserIdHandler(req: FastifyRequest<{ Querystr
 export const removeNewsHandler = async (request: FastifyRequest, reply: FastifyReply) => {
   const { userId, newsUrl } = request.body as { userId: string; newsUrl: string };
 
+
   if (typeof newsUrl !== 'string') {
-    return reply.status(400).send({ error: 'newsUrl must be a string' });
+      return reply.status(400).send({ error: 'newsUrl must be a string' });
   }
 
   if (!userId || !newsUrl) {
-    return reply.status(400).send({ error: 'Missing required fields' });
+      return reply.status(400).send({ error: 'Missing required fields' });
   }
 
   try {
-    await removeNewsFromDatabase(userId, newsUrl);
-    return reply.status(200).send({ message: 'News removed successfully' });
+      await removeNewsFromDatabase(userId, newsUrl);
+      return reply.status(200).send({ message: 'News removed successfully' });
   } catch (error) {
-    console.error('Error removing news:', error);
-    return reply.status(500).send({ error: 'Error removing news' });
+      console.error('Error removing news:', error);
+      return reply.status(500).send({ error: 'Error removing news' });
+  }
+}
+
+export const unfollowUniversityHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+  const { userId, universityId } = request.body as { userId: string; universityId: string };
+
+  try {
+    const unfollow = await unfollowUniversity(userId, universityId);
+    return reply.send({ success: true, unfollow });
+  } catch (error) {
+    console.error('Error unfollowing university:', error);
+    return reply.status(500).send({ error: 'Unable to unfollow university' });
   }
 };
+

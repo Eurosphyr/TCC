@@ -1,199 +1,214 @@
-import { Container, Name, NameBlue } from '@theme/style';
-import React, { useState, useRef, useEffect } from 'react';
-import { Animated, View, StyleSheet, Text, TouchableOpacity, Dimensions, TextInput, Image, } from 'react-native';
-import { responsiveFontSize } from 'react-native-responsive-dimensions';
-import { DrawerProps } from 'src/@types/interfaces';
+import  React, {useState, useRef} from 'react';
+
+import { Animated, View, StyleSheet, Text, TouchableOpacity, Dimensions, TextInput, Image, StatusBar, SafeAreaView } from 'react-native';
+import {
+  ContainerDrawer,
+  ScrollContainer,
+  NameBlue,
+  Name,
+  BackgroundInputText,
+  BorderColorTable,
+  BackgroundContainerInput,
+  BackgroundInput,
+} from '../theme/style';
+import { responsiveFontSize, responsiveHeight, responsiveScreenHeight, responsiveScreenWidth } from 'react-native-responsive-dimensions';
+import { SelectList } from 'react-native-dropdown-select-list'
 
 
-const dirImagem = 'http://projetoscti.com.br/projetoscti27/uninews/img/icon_logout.png';
-const dirImagem1 = 'http://projetoscti.com.br/projetoscti27/uninews/img/icon_lapis_editar.png';
+
+
+// Define the props interface for the Drawer component
+interface DrawerProps {
+  isOpen: boolean;
+  toggleDrawer: () => void;
+}
+
 
 const Drawer: React.FC<DrawerProps> = ({ isOpen, toggleDrawer }) => {
-  const drawerTranslateX = useRef(new Animated.Value(Dimensions.get('window').width)).current;
-  const screenWidth = Dimensions.get('window').width;
-  const drawerWidth = screenWidth * 0.85;
-  const textInputRef = useRef<TextInput>(null);
+  const drawerTranslateX = React.useRef(new Animated.Value(Dimensions.get('window').width)).current;
 
+  const screenWidth = Dimensions.get('window').width;
+  const textInputRef = useRef<TextInput>(null);
+  
+  const dirSeta= 'http://projetoscti.com.br/projetoscti27/uninews/img/Arrow.png'; 
+
+  const Icon= require('../../assets/imagens/icon_editar_vazio.png');
+
+  const [selected, setSelected] = React.useState('');
+    
+    const data = [
+        {key:'1', value:'TAIWAIN', disabled:true},
+        {key:'2', value:'CHINA'},
+        {key:'3', value:'EUA'},
+        {key:'4', value:'RUSSIA', disabled:true},
+        {key:'5', value:'BRASSIL'},
+        {key:'6', value:'UCRAINA'},
+        {key:'7', value:'JAPAO'},
+    ]
+
+  const drawerWidth = screenWidth * 0.70;
+
+  
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [textValue, setTextValue] = useState<string>('Ryandro');
-
-  useEffect(() => {
+  
+  React.useEffect(() => {
     Animated.timing(drawerTranslateX, {
-      toValue: isOpen ? screenWidth - drawerWidth : screenWidth,
+      toValue: isOpen ? screenWidth - drawerWidth : screenWidth, 
       duration: 400,
       useNativeDriver: true,
     }).start();
   }, [isOpen, drawerWidth, screenWidth]);
-
-  useEffect(() => {
-    if (isEditing && textInputRef.current) {
-      textInputRef.current.focus();
-    }
-  }, [isEditing]);
-
-  const handleButtonPress = () => {
-    setIsEditing(true); 
-  };
-
-  const handleTextInputBlur = () => {
-    setIsEditing(false); 
-  };
+  
 
   return (
-
+   <>
     <Animated.View style={[styles.drawer, { width: drawerWidth, transform: [{ translateX: drawerTranslateX }] }]}>
-      <Container style={styles.container}>
+      
+      <ContainerDrawer style={styles.container}>
       <TouchableOpacity onPress={toggleDrawer}>
-        <Image style={styles.seta} source={{uri: dirImagem}} />
+        <Image source={{uri:dirSeta}} style={styles.img}/>
       </TouchableOpacity>
 
-      <View style={styles.containerInput}>
-        <NameBlue style={styles.titulo}>Dados Pessoais</NameBlue>
-      </View>
 
-      <View style={styles.grupo}>
-      
-      <Name style={styles.label}>Nome:</Name>
-      
-      <View style={styles.campo}>
-        {isEditing ? (
+
+      <View style={styles.containerInput}>
+      <Name style={styles.titulo}>País</Name>
+          <SelectList 
+              setSelected={(val: any) => setSelected(val)} 
+              data={data} 
+              save="value"
+              boxStyles={styles.inputArea}
+              dropdownStyles={styles.inputDropdown}
+              dropdownTextStyles={{color: '#000'}}
+          />
+        <Name style={styles.titulo}>Estado</Name>
+          <SelectList 
+              setSelected={(val: any) => setSelected(val)} 
+              data={data} 
+              save="value"
+              boxStyles={styles.inputArea}
+              dropdownStyles={styles.inputDropdown}
+              dropdownTextStyles={{color: '#000'}}
+          />
+        <Name style={styles.titulo}>Universidade</Name>
+          <SelectList 
+              setSelected={(val: any) => setSelected(val)} 
+              data={data} 
+              save="value"
+              boxStyles={styles.inputArea}
+              dropdownStyles={styles.inputDropdown}
+              dropdownTextStyles={{color: '#000'}}
+          />
+
+
+      {/*{isEditing ? (
           <TextInput
-            ref={textInputRef}
+            ref={textInputRef} 
             style={styles.input}
             placeholder="Nome do usuário"
-            placeholderTextColor="#8F8F8F"
+            placeholderTextColor={'#8F8F8F'}
             value={textValue}
             onChangeText={setTextValue}
-            onBlur={handleTextInputBlur}
-            returnKeyType="done"
+            onBlur={() => setIsEditing(false)}
           />
         ) : (
-          <Name style={styles.valueText}>{textValue}</Name>
-        )
-        }
-        
-        
-      
-      </View>
-      
-      <View style={styles.campo1}>  
-          <TouchableOpacity onPress={handleButtonPress}>
-            <Image style={styles.imagem} source={{uri: dirImagem1}}/>
+          <TouchableOpacity style={styles.campo}  onPress={() => setIsEditing(true)}>
+            <Name style={styles.input}>{textValue || ''}</Name>
+            <Image
+                  source={Icon}
+                  style={styles.icon} 
+                  
+                />
+          
           </TouchableOpacity>
-        </View>
-      </View>
-
-
-      
-      <View style={styles.grupo}>
-      
-      <Name style={styles.label}>E-mail:</Name>
-      
-      <View style={styles.campo}>
-        {isEditing ? (
-          <TextInput
-            ref={textInputRef}
-            style={styles.input}
-            placeholder="E-mail do usuário"
-            placeholderTextColor="#8F8F8F"
-            value={textValue}
-            onChangeText={setTextValue}
-            onBlur={handleTextInputBlur}
-            returnKeyType="done"
-          />
-        ) : (
-          <Name style={styles.valueText}>{textValue}</Name>
-        )
-        }
-        
-        
-      
+        )}*/}
       </View>
       
-      <View style={styles.campo1}>  
-          <TouchableOpacity onPress={handleButtonPress}>
-            <Image style={styles.imagem} source={{uri: dirImagem1}}/>
-          </TouchableOpacity>
-        </View>
-      </View>
-      </Container>
+      
+      </ContainerDrawer>
+     
     </Animated.View>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: responsiveFontSize(2),
-    paddingLeft: responsiveFontSize(2),
-  },
   drawer: {
     position: 'absolute',
-    top: 0,
-    right: 0,
-    height: '100%',
-    backgroundColor: 'white',
+    height: responsiveScreenHeight(100),
     shadowColor: '#000',
     shadowOffset: { width: -2, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 5,
     zIndex: 1000,
+    borderTopLeftRadius: 20,
+    borderBottomLeftRadius: 20,
+  },
+  container:
+  {
+    borderTopLeftRadius: 20,
+    borderBottomLeftRadius: 20,
+    padding: responsiveHeight(2),
+    flex: 1,  },
+    inputArea: {
+      borderWidth: responsiveFontSize(0.2),
+      borderRadius: responsiveScreenWidth(10),
+      height: responsiveScreenHeight(4.5),
+      paddingLeft: '5%',
+      width: responsiveScreenWidth(55),
+      borderColor: '#F2A20C',
+      flexDirection: 'row',
+      paddingBottom: '1%',
+      backgroundColor: '#F5F5F5',
+      marginVertical: '5%',
+      marginLeft: '5%',
+    },
+    inputDropdown: {
+      borderWidth: responsiveFontSize(0.2),
+      maxHeight: responsiveScreenHeight(20),
+      paddingLeft: '5%',
+      width: responsiveScreenWidth(55),
+      borderColor: '#F2A20C',
+      paddingBottom: '1%',
+      backgroundColor: '#F5F5F5',
+      marginVertical: '5%',
+      marginLeft: '5%',
+    },
+  text: {
+    fontSize: 18,
+    marginBottom: 20,
   },
   button: {
     fontSize: 16,
     color: 'blue',
   },
   containerInput: {
-    flexDirection: 'column',
-    padding: 10,
+    flexDirection:'column',
+    padding:10,
   },
-  inputContainer: {
-    marginTop: 10
+  input:{
+    color:'#000',
+    marginRight:'5%'
   },
-  input: {
-    color: '#000',
-    marginRight: '5%',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    paddingHorizontal: 5,
-    marginBottom: 10,
+  titulo:{
+    fontFamily:'RubikNormal',
+    fontSize: responsiveHeight(3.5),
   },
-  titulo: {
-    fontFamily: 'Teacher',
-    fontSize: responsiveFontSize(4),
-  },
-  seta: {
-    width: '7%',
-    height: '20%',
-    resizeMode: 'contain',
-  },
-  valueText: {
-    fontSize: 14,
-    color: '#3c6294',
-    paddingHorizontal:'4%'
+  icon:{
+    width:'5.5%',
+    height:'100%'
   },
   campo:{
-    justifyContent:'center',
-    alignContent:'center'
+    flexDirection:'row'
   },
-  grupo:{
-    flexDirection:'row', 
-    alignItems:'center',
-    marginLeft:'6%',
+  img:{
+    width:responsiveScreenWidth(5),
+    height:responsiveScreenHeight(2),
+    marginTop:responsiveScreenHeight(2)
   },
-  campo1:{
-    
-  },
-  imagem:{
-    width:15,
-    height:15
-  },
-  label:
-  {
-    fontSize: responsiveFontSize(2),
-    fontFamily: 'RubikNormal',
-  }
+  
 });
 
 export default Drawer;

@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import { Pressable, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import {  useNavigation } from '@react-navigation/native';
+import {  StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../@types/rootstack';
 import { styles } from './footerStyle';
-import { BorderColorBlue, FooterContainer } from '@theme/style';
+import { BorderColorBlue, FooterContainer, Line } from '@theme/style';
 import { useAuth } from 'src/context/authContext';
 import { useAuthCheck } from 'src/context/authNavigation';
+
 
 
 const dirIconHouse = 'http://projetoscti.com.br/projetoscti27/uninews/img/icon_casa_cheio.png';
@@ -23,6 +24,7 @@ export function Footer() {
     const { user } = useAuth();
     const { checkAuth } = useAuthCheck();
   
+    
     useEffect(() => {
         checkAuth();
     }, []);
@@ -31,8 +33,9 @@ export function Footer() {
     const buttonStyle = isAdmin ? styles.button1 : styles.button;
 
     return (
-        <>
-            <BorderColorBlue style={styles.line} />
+        
+            <>
+            <Line style={styles.line} />
             <FooterContainer style={styles.container}>
                 <Pressable 
                     style={buttonStyle}
@@ -42,7 +45,9 @@ export function Footer() {
                 </Pressable>
                 <Pressable 
                     style={buttonStyle}
-                    onPress={() => navigation.navigate('Temas')}
+                    onPress={() => navigation.navigate('Pesquisar', 
+                        {navigation}
+                        )}
                 >
                     <Image source={{ uri: dirIconGlass }} style={styles.icon} />
                 </Pressable>
