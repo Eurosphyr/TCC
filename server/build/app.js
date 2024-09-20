@@ -1749,30 +1749,6 @@ function verifyUserRole(roleToVerify) {
   };
 }
 
-// src/http/controllers/news/temp-news.ts
-var import_client5 = require("@prisma/client");
-var prisma5 = new import_client5.PrismaClient();
-var createNews = async (request, reply) => {
-  try {
-    await prisma5.news.create({
-      data: {
-        title: request.body.title,
-        description: request.body.description,
-        url: request.body.url,
-        image: request.body.image,
-        content: request.body.content,
-        author: request.body.author,
-        university: {
-          connect: { id: request.body.universityId }
-        }
-      }
-    });
-    reply.send({ msg: "Not\xEDcia adicionada com sucesso!" });
-  } catch (e) {
-    reply.status(500).send({ error: "Erro ao adicionar not\xEDcia: " + e });
-  }
-};
-
 // src/http/controllers/news/temp-npm.ts
 var import_rss_to_json = require("rss-to-json");
 var getNpmData = async (request, reply) => {
@@ -1815,8 +1791,8 @@ async function getUniversityByNameController(request, reply) {
 }
 
 // src/repositories/prisma/prisma-save-repository.ts
-var import_client6 = require("@prisma/client");
-var prisma6 = new import_client6.PrismaClient();
+var import_client5 = require("@prisma/client");
+var prisma5 = new import_client5.PrismaClient();
 var saveNewsToDatabase = async (userId, newsData) => {
   const news = {
     link: newsData.link,
@@ -1831,7 +1807,7 @@ var saveNewsToDatabase = async (userId, newsData) => {
     media: newsData.media || {}
   };
   try {
-    const existingSave = await prisma6.savedNews.findFirst({
+    const existingSave = await prisma5.savedNews.findFirst({
       where: {
         userId,
         newsUrl: news.link
@@ -1841,7 +1817,7 @@ var saveNewsToDatabase = async (userId, newsData) => {
       console.log("Not\xEDcia j\xE1 salva para este usu\xE1rio.");
       return;
     }
-    await prisma6.news.upsert({
+    await prisma5.news.upsert({
       where: { link: news.link },
       update: {
         title: news.title,
@@ -1856,7 +1832,7 @@ var saveNewsToDatabase = async (userId, newsData) => {
       },
       create: news
     });
-    await prisma6.savedNews.upsert({
+    await prisma5.savedNews.upsert({
       where: { userId_newsUrl: { userId, newsUrl: news.link } },
       update: {},
       create: {
@@ -1870,7 +1846,7 @@ var saveNewsToDatabase = async (userId, newsData) => {
   }
 };
 var followUniversity = async (userId, universityId) => {
-  return prisma6.follow.create({
+  return prisma5.follow.create({
     data: {
       userId,
       universityId
@@ -1879,7 +1855,7 @@ var followUniversity = async (userId, universityId) => {
 };
 async function findNewsByUrl(link) {
   try {
-    const news = await prisma6.news.findUnique({
+    const news = await prisma5.news.findUnique({
       where: {
         link
       }
@@ -1898,7 +1874,7 @@ async function findNewsByUrl(link) {
 }
 async function getSavedNewsByUserId(userId) {
   try {
-    const savedNews = await prisma6.savedNews.findMany({
+    const savedNews = await prisma5.savedNews.findMany({
       where: { userId },
       include: { news: true }
     });
@@ -1912,7 +1888,7 @@ async function getSavedNewsByUserId(userId) {
 async function removeNewsFromDatabase(userId, newsUrl) {
   try {
     console.log(`Removing news for userId: ${userId} and newsUrl: ${newsUrl}`);
-    const result = await prisma6.savedNews.deleteMany({
+    const result = await prisma5.savedNews.deleteMany({
       where: {
         userId,
         newsUrl
@@ -1929,7 +1905,7 @@ async function removeNewsFromDatabase(userId, newsUrl) {
   }
 }
 var unfollowUniversity = async (userId, universityId) => {
-  return await prisma6.follow.deleteMany({
+  return await prisma5.follow.deleteMany({
     where: {
       userId,
       universityId
@@ -1938,7 +1914,7 @@ var unfollowUniversity = async (userId, universityId) => {
 };
 var getFollowedUniversitiesByUser = async (userId) => {
   try {
-    const followedUniversities = await prisma6.follow.findMany({
+    const followedUniversities = await prisma5.follow.findMany({
       where: {
         userId
       },
@@ -2221,7 +2197,6 @@ async function appRoutes(app2) {
   app2.delete("/deleteuniversity/:id", { preValidation: [app2.verifyJwt, verifyUserRole("ADMIN")] }, deleteUniversityController);
   app2.put("/university/:universityId", { preValidation: [app2.verifyJwt, verifyUserRole("ADMIN")] }, updateUniversityController);
   app2.delete("/unfollowuniversity", unfollowUniversityHandler);
-  app2.post("/news", createNews);
   app2.get("/npm/:text", getNpmData);
   app2.get("/npm/university/:text", getNpmDataWithoutLimit);
   app2.get("/news/:url", getNewsByUrlHandler);
